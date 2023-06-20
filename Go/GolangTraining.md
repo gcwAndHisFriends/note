@@ -162,3 +162,57 @@ greeting[3]
 delete(myGreeting, "two")
 ```
 
+# json 
+
+注意，如果首字母不大写，就无法转换
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type person struct {
+	First       string
+	Last        string
+	Age         int
+	notExported int
+}
+
+func main() {
+	p1 := person{"James", "Bond", 20, 007}
+	bs, _ := json.Marshal(p1)
+	fmt.Println(bs)
+	fmt.Printf("%T \n", bs)
+	fmt.Println(string(bs))//{"First":"James","Last":"Bond","Age":20}
+}
+```
+
+
+
+# struct tag
+
+在struct中的每一个field后面添加一段额外的注释或者说明，来**引导struct的encoding到某种格式中**
+
+```go
+type Person struct {
+    FirstName  string `json:"first_name"`
+    LastName   string `json:"last_name"`
+    MiddleName string `json:"middle_name,omitempty"`
+}
+```
+
+指定encoding到json后,各个field在json中的key名称
+
+```go
+p = Person{FirstName: "chen", LastName:"he"}
+解析后
+{
+  "first_name":"chen",
+  "last_name":"he"
+}
+```
+
+如果给结构体字段添加了`json:"-"`标签之后，它将被视为一个非导出字段，因此在序列化过程中将被忽略掉。
