@@ -216,3 +216,127 @@ p = Person{FirstName: "chen", LastName:"he"}
 ```
 
 如果给结构体字段添加了`json:"-"`标签之后，它将被视为一个非导出字段，因此在序列化过程中将被忽略掉。
+
+# sync.Waitgroup
+
+等待一组 goroutine 的结束
+
+```go
+var wg sync.WaitGroup
+func main() {
+	
+	wg.Add(2)
+	go foo()
+	go bar()
+	wg.Wait()
+}
+
+func foo() {
+	for i := 0; i < 45; i++ {
+		fmt.Println("Foo:", i)
+	}
+	wg.Done()
+}
+
+func bar() {
+	for i := 0; i < 45; i++ {
+		fmt.Println("Bar:", i)
+	}
+	wg.Done()
+}
+```
+
+# atomic库
+
+## add
+
+```go
+import (
+   "sync/atomic"
+)
+atomic.AddInt64(&counter, 1)
+```
+
+有
+
+```go
+func AddInt32(addr *int32, delta int32) (new int32)
+func AddInt64(addr *int64, delta int64) (new int64)
+func AddUint32(addr *uint32, delta uint32) (new uint32)
+func AddUint64(addr *uint64, delta uint64) (new uint64)
+func AddUintptr(addr *uintptr, delta uintptr) (new uintptr)
+```
+
+## cas
+
+```go
+func CompareAndSwapInt32(addr *int32, old, new int32) (swapped bool)
+func CompareAndSwapInt64(addr *int64, old, new int64) (swapped bool)
+func CompareAndSwapPointer(addr *unsafe.Pointer, old, new unsafe.Pointer) (swapped bool)
+func CompareAndSwapUint32(addr *uint32, old, new uint32) (swapped bool)
+func CompareAndSwapUint64(addr *uint64, old, new uint64) (swapped bool)
+func CompareAndSwapUintptr(addr *uintptr, old, new uintptr) (swapped bool)
+```
+
+比较当前 addr 地址对应值是不是等于 old，等于的话就更新成 new，并返回 true，不等于的话返回 false。
+
+**CAS 本身并未实现失败的后的处理机制，只不过我们最常用的处理方式是重试而已**。
+
+## swap
+
+Swap 会返回旧值
+
+```go
+func SwapInt32(addr *int32, new int32) (old int32)
+func SwapInt64(addr *int64, new int64) (old int64)
+func SwapPointer(addr *unsafe.Pointer, new unsafe.Pointer) (old unsafe.Pointer)
+func SwapUint32(addr *uint32, new uint32) (old uint32)
+func SwapUint64(addr *uint64, new uint64) (old uint64)
+func SwapUintptr(addr *uintptr, new uintptr) (old uintptr)
+```
+
+## Load
+
+Load 方法会取出 addr 地址中的值
+
+```
+func LoadInt32(addr *int32) (val int32)
+func LoadInt64(addr *int64) (val int64)
+func LoadPointer(addr *unsafe.Pointer) (val unsafe.Pointer)
+func LoadUint32(addr *uint32) (val uint32)
+func LoadUint64(addr *uint64) (val uint64)
+func LoadUintptr(addr *uintptr) (val uintptr)
+```
+
+## Store 
+
+将一个值存到指定的 addr 地址中去
+
+```go
+func StoreInt32(addr *int32, val int32)
+func StoreInt64(addr *int64, val int64)
+func StorePointer(addr *unsafe.Pointer, val unsafe.Pointer)
+func StoreUint32(addr *uint32, val uint32)
+func StoreUint64(addr *uint64, val uint64)
+func StoreUintptr(addr *uintptr, val uintptr)
+```
+
+上面的几种方法只支持基本的几种类型，因此，atomic 还提供了一个 Value 类型，它可以实现对任意类型（结构体）原子的存取操作。
+
+```go
+type Value struct {
+    v interface{}
+}
+
+func (v *Value) Load() (x interface{})
+func (v *Value) Store(x interface{})
+```
+
+
+
+# 锁定核数
+
+```go
+runtime.GOMAXPROCS(1)
+```
+
